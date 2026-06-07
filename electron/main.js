@@ -40,6 +40,7 @@ function createWindow() {
     y: saved?.y ?? undefined,
     minWidth: 800,
     minHeight: 500,
+    icon: path.join(__dirname, isDev ? '../public/logo.png' : '../dist/logo.png'),
     backgroundColor: '#0e1016',
     titleBarStyle: 'hidden',
     titleBarOverlay: {
