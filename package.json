@@ -1,0 +1,56 @@
+{
+  "name": "samoth-soundboard",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "concurrently \"cross-env BROWSER=none vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "preview": "vite preview",
+    "dist": "vite build && electron-builder --win portable"
+  },
+  "build": {
+    "appId": "gg.samoth.soundboard",
+    "productName": "Samoth Soundboard",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": ["portable"],
+      "icon": "public/logo.png"
+    },
+    "portable": {
+      "artifactName": "SamothSoundboard-${version}-portable.exe"
+    }
+  },
+  "dependencies": {
+    "@tonejs/midi": "^2.0.28",
+    "freepats": "^1.0.3",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "timidity": "^1.3.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^10.0.3",
+    "cross-env": "^10.1.0",
+    "electron": "^42.3.3",
+    "electron-builder": "^26.15.0",
+    "eslint": "^10.3.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.6.0",
+    "vite": "^8.0.12",
+    "wait-on": "^9.0.10"
+  }
+}
