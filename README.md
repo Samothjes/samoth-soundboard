@@ -1,16 +1,48 @@
-# React + Vite
+# 🔊 Samoth Soundboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A desktop soundboard app built with Electron + React — part soundboard, part instrument, part jam-session recorder.
 
-Currently, two official plugins are available:
+## Download
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Grab the latest portable build from the [Releases page](https://github.com/Samothjes/samoth-soundboard/releases) — it's a single `.exe`, no installation needed. Windows x64 only for now.
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Soundboard**
+- 24 customizable slots with icons, colors, and per-sound volume
+- Drag-and-drop audio import, with automatic loudness normalization so everything plays back at a consistent level
+- Hotkeys/macros to trigger sounds instantly
+- Waveform preview + trim editor to pick exactly which part of a sound plays
+- Scenes — save and instantly switch between named layouts (e.g. "Stream night", "D&D session")
 
-## Expanding the ESLint configuration
+**Piano**
+- Realistic multi-octave piano you can play with your keyboard or mouse
+- Sustain pedal — hold Space for momentary sustain (like a real foot pedal), or click the on-screen pedal to lock it on
+- Chord mode — play full chords from a single key
+- Record your own playing back as a song
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+**Drums**
+- Step sequencer with per-row volume/mute/solo, velocity & accents, swing/groove, pattern copy/paste, and WAV export
+- Drum pads for live triggering
+
+**Jam Session Recording**
+- Capture everything playing across the whole app — drum loop, piano, and soundboard hits — mixed together live, and export the take as a single WAV file
+
+## Development
+
+```bash
+npm install
+npm run start   # launches Vite + Electron together for development
+```
+
+To build a portable Windows executable:
+
+```bash
+npm run dist
+```
+
+The output lands in `release/`.
+
+## Tech stack
+
+Electron, React, Vite, Web Audio API.
