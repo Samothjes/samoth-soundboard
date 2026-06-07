@@ -445,7 +445,7 @@ export default function App() {
     <div className="app">
       <header className="titlebar">
         <div className="titlebar-left">
-          <img src="/logo.png" className="app-logo-img" alt="SSB" />
+          <img src="./logo.png" className="app-logo-img" alt="SSB" />
           <span className="app-name">Samoth Soundboard</span>
         </div>
         <div className="titlebar-controls">
