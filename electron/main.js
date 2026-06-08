@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, globalShortcut, dialog } from 'electron'
+import { app, BrowserWindow, ipcMain, globalShortcut, dialog, shell } from 'electron'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import fs from 'fs'
@@ -66,6 +66,15 @@ function createWindow() {
   win.on('resize', debouncedSave)
   win.on('move', debouncedSave)
   win.on('close', saveWindowState)
+
+  // Open external links (e.g. download pages from the Discord setup guide)
+  // in the user's default browser instead of a new Electron window.
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      shell.openExternal(url)
+    }
+    return { action: 'deny' }
+  })
 
   if (isDev) {
     win.loadURL('http://localhost:5173')

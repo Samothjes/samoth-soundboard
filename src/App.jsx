@@ -79,6 +79,7 @@ export default function App() {
   const [masterVolume, setMasterVolume] = useState(() => parseFloat(localStorage.getItem('ssb-volume') ?? '0.5'))
   const [outputDevices, setOutputDevices] = useState([])
   const [outputDevice, setOutputDevice] = useState(() => localStorage.getItem('ssb-output') ?? 'default')
+  const [discordGuideOpen, setDiscordGuideOpen] = useState(false)
   const builtinBuffers = useRef({})
 
   useEffect(() => {
@@ -460,6 +461,13 @@ export default function App() {
               ))}
             </select>
           </div>
+          <button
+            className="discord-guide-btn"
+            onClick={() => setDiscordGuideOpen(true)}
+            title="Want people in your Discord call to hear your sounds? Click for a step-by-step setup guide"
+          >
+            🎧 Send to Discord
+          </button>
           <div className="vol-control">
             <label>Vol</label>
             <input type="range" min={0} max={1} step={0.01} value={masterVolume}
@@ -576,6 +584,90 @@ export default function App() {
           onResult={(value) => { dialog.resolve(value); setDialog(null) }}
         />
       )}
+
+      {discordGuideOpen && (
+        <DiscordSetupGuide
+          outputDevices={outputDevices}
+          onClose={() => setDiscordGuideOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+// Helps people without a hardware mixer (GoXLR, etc.) get the sounds from
+// this app, mixed with their own microphone, into a Discord call. Walks
+// through installing a free virtual audio mixer (Voicemeeter) and wiring it
+// up, since Windows has no built-in way for one app to "speak into" another
+// app's microphone input.
+const VIRTUAL_DEVICE_HINTS = ['voicemeeter', 'vb-audio', 'cable', 'virtual']
+
+function DiscordSetupGuide({ outputDevices, onClose }) {
+  const detected = outputDevices.find(d =>
+    VIRTUAL_DEVICE_HINTS.some(hint => (d.label || '').toLowerCase().includes(hint))
+  )
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal discord-guide-modal" onClick={e => e.stopPropagation()}>
+        <h2>🎧 Send your sounds into Discord</h2>
+        <p className="discord-guide-intro">
+          Discord can only listen to one microphone at a time, and Windows does not
+          let one app "speak into" another app's microphone input directly. People who
+          do this (streamers, GoXLR owners, etc.) all rely on the same trick: a free
+          virtual audio mixer that combines your microphone and this app's sounds into
+          a single virtual input that Discord can pick up. Here's how to set it up,
+          it only takes a few minutes and never has to be repeated.
+        </p>
+
+        {detected ? (
+          <div className="discord-guide-detected">
+            ✅ Looks like you already have a virtual audio device installed: <strong>{detected.label}</strong>.
+            You can likely skip step 1 below, just select it as your Output here, and
+            as your Microphone in Discord.
+          </div>
+        ) : (
+          <div className="discord-guide-missing">
+            We didn't detect a virtual audio mixer on your system yet, follow step 1 to install one (it's free).
+          </div>
+        )}
+
+        <ol className="discord-guide-steps">
+          <li>
+            <strong>Install Voicemeeter (free)</strong>, a virtual audio mixer that lets
+            you combine your mic and app sounds into one input.
+            <div>
+              <a href="https://vb-audio.com/Voicemeeter/" target="_blank" rel="noopener noreferrer" className="discord-guide-link">
+                Download Voicemeeter ↗
+              </a>
+            </div>
+          </li>
+          <li>
+            <strong>Open Voicemeeter</strong> and route your real microphone into one of
+            its input strips (Voicemeeter shows a quick setup guide for this on first launch).
+          </li>
+          <li>
+            <strong>In this app</strong>, set the <em>Output</em> dropdown above to
+            <code> Voicemeeter Input (VB-Audio Voicemeeter VAIO)</code>, this sends
+            everything you play here into the mixer instead of your speakers.
+          </li>
+          <li>
+            <strong>In Discord</strong>, go to User Settings → Voice &amp; Video → Input Device,
+            and select <code>Voicemeeter Output (VB-Audio Voicemeeter VAIO)</code>.
+            Discord will now hear your microphone and this app's sounds mixed together.
+          </li>
+          <li>
+            <strong>Tip:</strong> Voicemeeter also lets you keep hearing everything through
+            your normal speakers/headset at the same time (set its "Hardware Out" to your
+            usual playback device), so you don't lose your own monitoring.
+          </li>
+        </ol>
+
+        <div className="modal-actions">
+          <div style={{ flex: 1 }} />
+          <button className="modal-save" onClick={onClose}>Got it</button>
+        </div>
+      </div>
     </div>
   )
 }
