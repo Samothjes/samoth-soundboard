@@ -126,6 +126,52 @@ export function generateWow(ctx) {
   return buf
 }
 
+export function generateWrongBuzzer(ctx) {
+  // Classic game-show "ehhhh" wrong-answer buzzer: a harsh, sustained low buzz
+  const duration = 1.1
+  const buf = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate)
+  const data = buf.getChannelData(0)
+  const freq = 110
+  const detune = 6 // slightly detuned second oscillator creates the "buzzy" beating
+  for (let i = 0; i < data.length; i++) {
+    const t = i / ctx.sampleRate
+    const env = Math.min(1, t * 30) * Math.pow(1 - t / duration, 0.25)
+    const wave = (
+      Math.sin(2 * Math.PI * freq * t) +
+      Math.sin(2 * Math.PI * (freq + detune) * t) +
+      0.5 * Math.sin(2 * Math.PI * freq * 2 * t) +
+      0.3 * Math.sin(2 * Math.PI * freq * 3 * t)
+    )
+    data[i] = env * 0.35 * wave
+  }
+  return buf
+}
+
+export function generateCorrectDing(ctx) {
+  // Cheerful ascending bell chime for a correct/good answer ("ding ding ding!")
+  const duration = 1.0
+  const buf = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate)
+  const data = buf.getChannelData(0)
+  const notes = [523.25, 659.25, 783.99] // C5, E5, G5 — major chord arpeggio
+  const noteSpacing = 0.13
+  for (let i = 0; i < data.length; i++) {
+    const t = i / ctx.sampleRate
+    let sample = 0
+    notes.forEach((freq, idx) => {
+      const nt = t - idx * noteSpacing
+      if (nt < 0) return
+      const env = Math.min(1, nt * 40) * Math.exp(-nt * 4)
+      sample += env * 0.45 * (
+        Math.sin(2 * Math.PI * freq * nt) +
+        0.4 * Math.sin(2 * Math.PI * freq * 2 * nt) +
+        0.15 * Math.sin(2 * Math.PI * freq * 3 * nt)
+      )
+    })
+    data[i] = sample
+  }
+  return buf
+}
+
 export const BUILTIN_SOUNDS = [
   { id: 'airhorn',     label: 'Airhorn',      icon: '📯', generator: generateAirhorn },
   { id: 'vineboom',    label: 'Vine Boom',    icon: '💥', generator: generateVineBoom },
@@ -135,4 +181,6 @@ export const BUILTIN_SOUNDS = [
   { id: 'oof',         label: 'Oof',          icon: '😬', generator: generateOof },
   { id: 'alarm',       label: 'Alarm',        icon: '🚨', generator: generateAlarm },
   { id: 'wow',         label: 'Wow',          icon: '😮', generator: generateWow },
+  { id: 'wronganswer', label: 'Wrong Answer', icon: '❌', generator: generateWrongBuzzer },
+  { id: 'correctanswer', label: 'Correct!',   icon: '✅', generator: generateCorrectDing },
 ]
