@@ -14,6 +14,7 @@ import './App.css'
 const isElectron = !!window.electronAPI
 const SLOT_COUNT = 24
 const STORAGE_KEY = 'soundboard-slots-v2'
+const SEEN_BUILTINS_KEY = 'soundboard-seen-builtins-v1'
 const SCENES_KEY = 'soundboard-scenes-v1'
 
 const player = new AudioPlayer()
@@ -28,11 +29,51 @@ function makeDefaultSlots() {
   })
 }
 
+// Tracks which built-in sound IDs have already been introduced to this user's
+// board, so that newly-added built-ins (from an app update) get placed onto
+// existing boards exactly once — without permanently re-adding ones the user
+// deliberately removed, and without ever overwriting the user's own sounds.
+function loadSeenBuiltins() {
+  try {
+    const saved = localStorage.getItem(SEEN_BUILTINS_KEY)
+    if (saved) return new Set(JSON.parse(saved))
+  } catch {}
+  return new Set()
+}
+
+function saveSeenBuiltins(set) {
+  try {
+    localStorage.setItem(SEEN_BUILTINS_KEY, JSON.stringify([...set]))
+  } catch {}
+}
+
 function loadSlots() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) return JSON.parse(saved)
+    if (saved) {
+      const slots = JSON.parse(saved)
+      const seen = loadSeenBuiltins()
+      const present = new Set(slots.map(s => s.builtinId).filter(Boolean))
+      // "New" = a built-in that exists in this app version, isn't currently
+      // on the board, AND has never been introduced to this user before.
+      const fresh = BUILTIN_SOUNDS.filter(b => !present.has(b.id) && !seen.has(b.id))
+      if (fresh.length) {
+        let f = 0
+        for (let i = 0; i < slots.length && f < fresh.length; i++) {
+          const s = slots[i]
+          if (!s.label && !s.builtinId && !s.dataUrl) {
+            const builtin = fresh[f++]
+            slots[i] = { ...s, label: builtin.label, icon: builtin.icon, builtinId: builtin.id }
+          }
+        }
+      }
+      // Mark every known built-in as "seen" so future loads only react to
+      // genuinely new ones, never re-inserting ones the user removed.
+      saveSeenBuiltins(new Set(BUILTIN_SOUNDS.map(b => b.id)))
+      return slots
+    }
   } catch {}
+  saveSeenBuiltins(new Set(BUILTIN_SOUNDS.map(b => b.id)))
   return makeDefaultSlots()
 }
 
